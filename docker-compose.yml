@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  exchangerdb:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_DB: exchanger
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - '5432:5432'
+    volumes:
+      - exchangerdb:/var/lib/postgresql/data
+    command: -p 5432
+
+volumes:
+  exchangerdb:
+    driver: local

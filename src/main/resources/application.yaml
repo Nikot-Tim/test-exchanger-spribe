@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/exchanger
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master.xml
+
+application:
+  currency:
+    availableCurrenciesFilePath: "currencies.json"
+
+exchanger:
+  apiKey: "b941d062d60cc6a90e5b926514acb97f"
+  baseUrl: "http://api.exchangeratesapi.io/v1/"
+
+scheduler:
+  updateAvailableCurrenciesScheduler:
+    cronExpression: 0 0 0 * * ?
+  updateRatesForCurrenciesScheduler:
+    cronExpression: 0 0 * * * *
