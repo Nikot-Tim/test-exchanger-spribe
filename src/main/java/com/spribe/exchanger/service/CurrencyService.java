@@ -20,5 +20,4 @@ public interface CurrencyService {
 
     //PageResponse<Currency> getAllCurrencies(Specification<String> specification, Pageable pageable);
 
-
 }
