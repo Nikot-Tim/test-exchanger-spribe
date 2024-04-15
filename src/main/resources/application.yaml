@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/exchanger
@@ -15,7 +18,7 @@ application:
 
 exchanger:
   apiKey: "b941d062d60cc6a90e5b926514acb97f"
-  baseUrl: "http://api.exchangeratesapi.io/v1/"
+  baseUrl: http://api.exchangeratesapi.io/v1/
 
 scheduler:
   updateAvailableCurrenciesScheduler:

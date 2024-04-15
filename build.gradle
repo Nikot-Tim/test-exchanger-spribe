@@ -40,7 +40,7 @@ dependencies {
 	//Cache
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
 
-	//Lombok
+    //Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
@@ -50,6 +50,9 @@ dependencies {
 
 	//Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//Test database
+	testImplementation 'com.h2database:h2:2.2.224'
 
 	//Open API
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'

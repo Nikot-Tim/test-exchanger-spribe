@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: postgrestest
+    password: roottest
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: true
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master-test.xml
+
+application:
+  currency:
+    availableCurrenciesFilePath: "currencies_test.json"
+
+exchanger:
+  apiKey: testApiKey
+  baseUrl: http://api.exchangeratesapi.io/v1/
+
+scheduler:
+  updateAvailableCurrenciesScheduler:
+    cronExpression: 0 0 0 * * ?
+  updateRatesForCurrenciesScheduler:
+    cronExpression: 0 0 * * * *

@@ -28,7 +28,7 @@ public class Currency {
     private String name;
 
     @NotBlank
-    @Size(max = 3)
+    @Size(min = 3, max = 3)
     @Pattern(regexp = "[A-Z]+")
     @JsonView({OnAddNewCurrency.class, OnGetAllCurrencies.class, OnGetAllCurrencyRates.class})
     private String code;

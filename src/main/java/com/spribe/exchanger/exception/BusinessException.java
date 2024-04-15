@@ -1,9 +1,10 @@
 package com.spribe.exchanger.exception;
 
-import com.spribe.exchanger.error.ErrorCode;
 import com.spribe.exchanger.error.ErrorHolder;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public class BusinessException extends RuntimeException {
 
     private final HttpStatus httpStatus;
@@ -13,23 +14,5 @@ public class BusinessException extends RuntimeException {
         super(errorHolder.getCode().name());
         this.httpStatus = httpStatus;
         this.errorHolder = errorHolder;
-    }
-
-    public BusinessException(HttpStatus httpStatus, ErrorHolder errorHolder, Throwable cause) {
-        super(errorHolder.getCode().name(), cause);
-        this.httpStatus = httpStatus;
-        this.errorHolder = errorHolder;
-    }
-
-    public ErrorCode getErrorCode() {
-        return errorHolder.getCode();
-    }
-
-    public ErrorHolder getErrorHolder() {
-        return errorHolder;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
     }
 }

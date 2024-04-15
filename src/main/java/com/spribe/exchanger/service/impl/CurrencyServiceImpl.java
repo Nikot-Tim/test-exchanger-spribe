@@ -13,6 +13,7 @@ import com.spribe.exchanger.repository.CurrencyRepository;
 import com.spribe.exchanger.service.CurrencyService;
 import com.spribe.exchanger.utill.PageResponse;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,12 +33,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.lang.String.format;
+
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class CurrencyServiceImpl implements CurrencyService {
-
 
     @Value("${application.currency.availableCurrenciesFilePath}")
     private String availableCurrenciesFilePath;
@@ -60,13 +63,30 @@ public class CurrencyServiceImpl implements CurrencyService {
     public void refreshCurrenciesRates() {
         memoryRatesDb.clear();
 
-        currencyRepository.findAll()
-                .forEach(savedCurrency -> {
+        List<CurrencyEntity> refreshedCurrencyEntities = currencyRepository.findAll().stream()
+                .peek(savedCurrency -> {
                     var refreshedCurrencyRates = exchangerClient.fetchRatesForCurrency(savedCurrency.getCode());
                     savedCurrency.setRates(refreshedCurrencyRates);
-                    var refreshedCurrency = currencyMapper.toDto(currencyRepository.save(savedCurrency));
-                    memoryRatesDb.put(refreshedCurrency.getCode(), refreshedCurrency);
-                });
+                })
+                .toList();
+
+        var refreshedCurrencies = currencyMapper.toDto(currencyRepository.saveAll(refreshedCurrencyEntities));
+
+        refreshedCurrencies.forEach(refreshedCurrency -> memoryRatesDb.put(refreshedCurrency.getCode(), refreshedCurrency));
+    }
+
+    @PreDestroy
+    private void destroy() {
+        File file = new File(availableCurrenciesFilePath);
+        if (file.exists()) {
+            if (file.delete()) {
+                log.info("Successful deletion of a file " + availableCurrenciesFilePath);
+            } else {
+                log.info("Error deleting a file " + availableCurrenciesFilePath);
+            }
+        } else {
+            log.info(format("File %s not found", availableCurrenciesFilePath));
+        }
     }
 
     @Override
@@ -125,7 +145,7 @@ public class CurrencyServiceImpl implements CurrencyService {
         if (currency != null || currencyRepository.findByCode(code).isPresent()) {
             log.info("Currency with code = {} already exists", code);
             throw new BusinessException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    HttpStatus.BAD_REQUEST,
                     ErrorCode.CURRENCY_ALREADY_EXISTS.withAdditionalParam(code)
             );
         }
@@ -188,21 +208,4 @@ public class CurrencyServiceImpl implements CurrencyService {
         return currencies.stream()
                 .toList().subList(fromIndex, toIndex);
     }
-
-//    @Override
-//    @Transactional(readOnly = true)
-//    public PageResponse<Currency> getAllCurrencies(Specification specification, Pageable pageable) {
-//        log.info("CurrencyServiceImpl.getAllCurrencies fetching data from memory started");
-//        var currencies = memoryRatesDb.values();
-//        log.info("CurrencyServiceImpl.getAllCurrencies fetching data from memory finished");
-//
-//        if (CollectionUtils.isEmpty(currencies)) {
-//            log.info("CurrencyServiceImpl.getAllCurrencies fetching data from database started");
-//            Page<CurrencyEntity> currencyEntities = currencyRepository.findAll(specification, pageable);
-//            currencies = currencyMapper.toDto(currencyEntities.getContent());
-//            log.info("CurrencyServiceImpl.getAllCurrencies fetching data from database finished");
-//        }
-//
-//        return PageResponse.of(currencies, pageable, currencies.getTotalElements());
-//    }
 }
